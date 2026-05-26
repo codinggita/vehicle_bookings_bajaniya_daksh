@@ -8,7 +8,7 @@ exports.getAllBookings = async (req, res) => {
       driverRating, customerRating, minFare, maxFare,
       minDistance, maxDistance, distanceAbove, distanceBelow,
       customer, incomplete, cancelledByDriver, cancelledByCustomer,
-      minRating, maxRating, sort
+      minRating, maxRating, sort, month, year, hour
     } = req.query;
     
     const filter = {};
@@ -46,18 +46,26 @@ exports.getAllBookings = async (req, res) => {
 
     // Ranges for Driver Rating
     if (minRating || maxRating) {
-      // Assuming minRating/maxRating applies to Driver Rating for this example
       if (!filter.Driver_Ratings) filter.Driver_Ratings = {};
       if (minRating) filter.Driver_Ratings.$gte = Number(minRating);
       if (maxRating) filter.Driver_Ratings.$lte = Number(maxRating);
     }
+    
+    // Time-based filtering additions
+    if (month) filter.Month = month;
+    if (year) filter.Year = year;
+    if (hour) filter.Hour = hour;
+
+    // Pagination
+    const pageNum = parseInt(req.query.page, 10) || 1;
+    const limitNum = parseInt(req.query.limit, 10) || 1000; // default to a high number if not specified
+    const skip = (pageNum - 1) * limitNum;
 
     // Query execution
-    let query = Data.find(filter);
+    let query = Data.find(filter).skip(skip).limit(limitNum);
 
     // Sorting
     if (sort) {
-      // sort=-Booking_Value -> { Booking_Value: -1 }
       const sortFields = sort.split(',').reduce((acc, field) => {
         if (field.startsWith('-')) {
           acc[field.substring(1)] = -1;
