@@ -131,3 +131,115 @@ exports.createLocation = (req, res) => createGenericRecord(req, res, 'Location')
 exports.bulkInsertBookings = (req, res) => bulkInsertGeneric(req, res, 'Bookings');
 exports.bulkInsertCustomers = (req, res) => bulkInsertGeneric(req, res, 'Customers');
 exports.bulkInsertDrivers = (req, res) => bulkInsertGeneric(req, res, 'Drivers');
+
+// --- PUT Routes (full replace) ---
+
+exports.replaceCustomer = async (req, res) => {
+  try {
+    const updated = await Data.findByIdAndUpdate(req.params.customerId, req.body, { new: true, overwrite: true });
+    if (!updated) return res.status(404).json({ message: 'Customer not found' });
+    res.status(200).json(updated);
+  } catch (error) {
+    res.status(500).json({ message: 'Error replacing customer', error: error.message });
+  }
+};
+
+exports.replaceDriver = async (req, res) => {
+  try {
+    const updated = await Data.findByIdAndUpdate(req.params.driverId, req.body, { new: true, overwrite: true });
+    if (!updated) return res.status(404).json({ message: 'Driver not found' });
+    res.status(200).json(updated);
+  } catch (error) {
+    res.status(500).json({ message: 'Error replacing driver', error: error.message });
+  }
+};
+
+exports.replaceVehicle = async (req, res) => {
+  try {
+    const updated = await Data.findByIdAndUpdate(req.params.vehicleId, req.body, { new: true, overwrite: true });
+    if (!updated) return res.status(404).json({ message: 'Vehicle not found' });
+    res.status(200).json(updated);
+  } catch (error) {
+    res.status(500).json({ message: 'Error replacing vehicle', error: error.message });
+  }
+};
+
+// --- DELETE Routes ---
+
+exports.deleteCustomer = async (req, res) => {
+  try {
+    const deleted = await Data.findByIdAndDelete(req.params.customerId);
+    if (!deleted) return res.status(404).json({ message: 'Customer not found' });
+    res.status(200).json({ message: 'Customer deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting customer', error: error.message });
+  }
+};
+
+exports.deleteDriver = async (req, res) => {
+  try {
+    const deleted = await Data.findByIdAndDelete(req.params.driverId);
+    if (!deleted) return res.status(404).json({ message: 'Driver not found' });
+    res.status(200).json({ message: 'Driver deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting driver', error: error.message });
+  }
+};
+
+exports.deleteVehicle = async (req, res) => {
+  try {
+    const deleted = await Data.findByIdAndDelete(req.params.vehicleId);
+    if (!deleted) return res.status(404).json({ message: 'Vehicle not found' });
+    res.status(200).json({ message: 'Vehicle deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting vehicle', error: error.message });
+  }
+};
+
+exports.deletePayment = async (req, res) => {
+  try {
+    const deleted = await Data.findByIdAndDelete(req.params.paymentId);
+    if (!deleted) return res.status(404).json({ message: 'Payment not found' });
+    res.status(200).json({ message: 'Payment deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting payment', error: error.message });
+  }
+};
+
+exports.deleteRating = async (req, res) => {
+  try {
+    const deleted = await Data.findByIdAndDelete(req.params.ratingId);
+    if (!deleted) return res.status(404).json({ message: 'Rating not found' });
+    res.status(200).json({ message: 'Rating deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting rating', error: error.message });
+  }
+};
+
+exports.deleteLog = async (req, res) => {
+  try {
+    const deleted = await Data.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: 'Log not found' });
+    res.status(200).json({ message: 'Log deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting log', error: error.message });
+  }
+};
+
+exports.deleteAllCustomers = async (req, res) => {
+  try {
+    const result = await Data.deleteMany({});
+    res.status(200).json({ message: 'All customers deleted successfully', count: result.deletedCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting all customers', error: error.message });
+  }
+};
+
+exports.deleteAllCancelledRides = async (req, res) => {
+  try {
+    const result = await Data.deleteMany({ Booking_Status: /Canceled/i });
+    res.status(200).json({ message: 'All cancelled rides deleted', count: result.deletedCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting cancelled rides', error: error.message });
+  }
+};

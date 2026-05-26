@@ -23,10 +23,12 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const otherRoutes = require('./routes/otherRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const searchRoutes = require('./routes/searchRoutes');
+const statsRoutes = require('./routes/statsRoutes');
 
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/stats', statsRoutes);
 app.use('/api', otherRoutes);
 
 app.get('/', (req, res) => {
