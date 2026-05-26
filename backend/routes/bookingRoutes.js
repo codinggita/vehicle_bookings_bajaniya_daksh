@@ -118,6 +118,21 @@ router.patch('/:bookingId/status', bookingController.updateBookingStatus);
 // PATCH /bookings/:bookingId/payment - Update booking payment
 router.patch('/:bookingId/payment', bookingController.updateBookingPayment);
 
+// PATCH /bookings/:bookingId/rating - Update booking rating
+router.patch('/:bookingId/rating', bookingController.updateBookingRating);
+
+// PATCH /bookings/:bookingId/fare - Update booking fare
+router.patch('/:bookingId/fare', bookingController.updateBookingFare);
+
+// PATCH /bookings/:bookingId/distance - Update ride distance
+router.patch('/:bookingId/distance', bookingController.updateBookingDistance);
+
+// PATCH /bookings/:bookingId/location - Update ride location
+router.patch('/:bookingId/location', bookingController.updateBookingLocation);
+
+// DELETE /bookings/delete-all - Delete all bookings
+router.delete('/delete-all', bookingController.deleteAllBookings);
+
 // 6. DELETE /bookings/:bookingId - Delete booking
 router.delete('/:bookingId', bookingController.deleteBooking);
 

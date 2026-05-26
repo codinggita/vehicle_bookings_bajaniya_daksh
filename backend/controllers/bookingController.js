@@ -153,6 +153,60 @@ exports.updateBookingPayment = async (req, res) => {
   }
 };
 
+// PATCH /bookings/:bookingId/rating - Update booking rating
+exports.updateBookingRating = async (req, res) => {
+  try {
+    const { driverRating, customerRating } = req.body;
+    const updateData = {};
+    if (driverRating !== undefined) updateData.Driver_Ratings = driverRating;
+    if (customerRating !== undefined) updateData.Customer_Rating = customerRating;
+    const updatedBooking = await Data.findByIdAndUpdate(req.params.bookingId, updateData, { new: true });
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(updatedBooking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating booking rating', error: error.message });
+  }
+};
+
+// PATCH /bookings/:bookingId/fare - Update booking fare
+exports.updateBookingFare = async (req, res) => {
+  try {
+    const { fare } = req.body;
+    const updatedBooking = await Data.findByIdAndUpdate(req.params.bookingId, { Booking_Value: fare }, { new: true });
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(updatedBooking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating booking fare', error: error.message });
+  }
+};
+
+// PATCH /bookings/:bookingId/distance - Update ride distance
+exports.updateBookingDistance = async (req, res) => {
+  try {
+    const { distance } = req.body;
+    const updatedBooking = await Data.findByIdAndUpdate(req.params.bookingId, { Ride_Distance: distance }, { new: true });
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(updatedBooking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating ride distance', error: error.message });
+  }
+};
+
+// PATCH /bookings/:bookingId/location - Update ride location
+exports.updateBookingLocation = async (req, res) => {
+  try {
+    const { pickup, drop } = req.body;
+    const updateData = {};
+    if (pickup) updateData.Pickup_Location = pickup;
+    if (drop) updateData.Drop_Location = drop;
+    const updatedBooking = await Data.findByIdAndUpdate(req.params.bookingId, updateData, { new: true });
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(updatedBooking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating ride location', error: error.message });
+  }
+};
+
 // 6. DELETE /bookings/:bookingId - Delete booking
 exports.deleteBooking = async (req, res) => {
   try {
@@ -161,6 +215,16 @@ exports.deleteBooking = async (req, res) => {
     res.status(200).json({ message: 'Booking deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting booking', error: error.message });
+  }
+};
+
+// DELETE /bookings/delete-all - Delete all bookings
+exports.deleteAllBookings = async (req, res) => {
+  try {
+    const result = await Data.deleteMany({});
+    res.status(200).json({ message: 'All bookings deleted successfully', count: result.deletedCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting all bookings', error: error.message });
   }
 };
 
