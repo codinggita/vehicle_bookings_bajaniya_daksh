@@ -1,16 +1,75 @@
 const Data = require('../models/Data');
 
-// 1. GET /bookings - Fetch all bookings (Updated to support Query Parameters for next 4 'routes')
+// 1. GET /bookings - Fetch all bookings (Enhanced for next 20 query parameter routes)
 exports.getAllBookings = async (req, res) => {
   try {
-    const { status, vehicle, payment, pickup } = req.query;
+    const {
+      status, vehicle, payment, pickup, drop, date, time,
+      driverRating, customerRating, minFare, maxFare,
+      minDistance, maxDistance, distanceAbove, distanceBelow,
+      customer, incomplete, cancelledByDriver, cancelledByCustomer,
+      minRating, maxRating, sort
+    } = req.query;
+    
     const filter = {};
+    
+    // Basic Exact Matches
     if (status) filter.Booking_Status = status;
     if (vehicle) filter.Vehicle_Type = vehicle;
     if (payment) filter.Payment_Method = payment;
     if (pickup) filter.Pickup_Location = pickup;
+    if (drop) filter.Drop_Location = drop;
+    if (date) filter.Date = date;
+    if (time) filter.Time = time;
+    if (driverRating) filter.Driver_Ratings = Number(driverRating);
+    if (customerRating) filter.Customer_Rating = Number(customerRating);
+    if (customer) filter.Customer_ID = customer;
+    if (incomplete) filter.Incomplete_Rides = incomplete;
+    if (cancelledByDriver) filter.Canceled_Rides_by_Driver = cancelledByDriver === 'true' ? 'Yes' : 'No';
+    if (cancelledByCustomer) filter.Canceled_Rides_by_Customer = cancelledByCustomer === 'true' ? 'Yes' : 'No';
 
-    const bookings = await Data.find(filter);
+    // Ranges for Fare
+    if (minFare || maxFare) {
+      filter.Booking_Value = {};
+      if (minFare) filter.Booking_Value.$gte = Number(minFare);
+      if (maxFare) filter.Booking_Value.$lte = Number(maxFare);
+    }
+
+    // Ranges for Distance
+    const minD = minDistance || distanceAbove;
+    const maxD = maxDistance || distanceBelow;
+    if (minD || maxD) {
+      filter.Ride_Distance = {};
+      if (minD) filter.Ride_Distance.$gte = Number(minD);
+      if (maxD) filter.Ride_Distance.$lte = Number(maxD);
+    }
+
+    // Ranges for Driver Rating
+    if (minRating || maxRating) {
+      // Assuming minRating/maxRating applies to Driver Rating for this example
+      if (!filter.Driver_Ratings) filter.Driver_Ratings = {};
+      if (minRating) filter.Driver_Ratings.$gte = Number(minRating);
+      if (maxRating) filter.Driver_Ratings.$lte = Number(maxRating);
+    }
+
+    // Query execution
+    let query = Data.find(filter);
+
+    // Sorting
+    if (sort) {
+      // sort=-Booking_Value -> { Booking_Value: -1 }
+      const sortFields = sort.split(',').reduce((acc, field) => {
+        if (field.startsWith('-')) {
+          acc[field.substring(1)] = -1;
+        } else {
+          acc[field] = 1;
+        }
+        return acc;
+      }, {});
+      query = query.sort(sortFields);
+    }
+
+    const bookings = await query;
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings', error: error.message });
