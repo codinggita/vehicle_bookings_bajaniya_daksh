@@ -1,0 +1,216 @@
+const Data = require('../models/Data');
+
+// 1. GET /bookings - Fetch all bookings
+exports.getAllBookings = async (req, res) => {
+  try {
+    const bookings = await Data.find({});
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings', error: error.message });
+  }
+};
+
+// 2. GET /bookings/:bookingId - Fetch booking by _id (or Booking_ID if preferred, but _id is standard for generic ID)
+exports.getBookingById = async (req, res) => {
+  try {
+    const booking = await Data.findById(req.params.bookingId);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(booking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching booking', error: error.message });
+  }
+};
+
+// 3. POST /bookings - Create new booking
+exports.createBooking = async (req, res) => {
+  try {
+    const newBooking = new Data(req.body);
+    const savedBooking = await newBooking.save();
+    res.status(201).json(savedBooking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating booking', error: error.message });
+  }
+};
+
+// 4. PUT /bookings/:bookingId - Replace booking details
+exports.updateBooking = async (req, res) => {
+  try {
+    const updatedBooking = await Data.findByIdAndUpdate(
+      req.params.bookingId,
+      req.body,
+      { new: true, overwrite: true }
+    );
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(updatedBooking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating booking', error: error.message });
+  }
+};
+
+// 5. PATCH /bookings/:bookingId/status - Update booking status
+exports.updateBookingStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const updatedBooking = await Data.findByIdAndUpdate(
+      req.params.bookingId,
+      { Booking_Status: status },
+      { new: true }
+    );
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(updatedBooking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating booking status', error: error.message });
+  }
+};
+
+// 6. DELETE /bookings/:bookingId - Delete booking
+exports.deleteBooking = async (req, res) => {
+  try {
+    const deletedBooking = await Data.findByIdAndDelete(req.params.bookingId);
+    if (!deletedBooking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json({ message: 'Booking deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting booking', error: error.message });
+  }
+};
+
+// 7. GET /bookings/id/:bookingId - Fetch booking by Booking_ID (Custom ID)
+exports.getBookingByBookingId = async (req, res) => {
+  try {
+    const booking = await Data.findOne({ Booking_ID: req.params.bookingId });
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(booking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching booking', error: error.message });
+  }
+};
+
+// 8. GET /bookings/status/:status - Fetch bookings by status
+exports.getBookingsByStatus = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Booking_Status: req.params.status });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by status', error: error.message });
+  }
+};
+
+// 9. GET /bookings/customer/:customerId - Fetch bookings by customer
+exports.getBookingsByCustomer = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Customer_ID: req.params.customerId });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by customer', error: error.message });
+  }
+};
+
+// 10. GET /bookings/vehicle/:vehicleType - Fetch bookings by vehicle type
+exports.getBookingsByVehicle = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Vehicle_Type: req.params.vehicleType });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by vehicle', error: error.message });
+  }
+};
+
+// 11. GET /bookings/payment/:method - Fetch bookings by payment method
+exports.getBookingsByPayment = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Payment_Method: req.params.method });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by payment', error: error.message });
+  }
+};
+
+// 12. GET /bookings/pickup/:location - Fetch bookings by pickup location
+exports.getBookingsByPickup = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Pickup_Location: req.params.location });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by pickup', error: error.message });
+  }
+};
+
+// 13. GET /bookings/drop/:location - Fetch bookings by drop location
+exports.getBookingsByDrop = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Drop_Location: req.params.location });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by drop', error: error.message });
+  }
+};
+
+// 14. GET /bookings/date/:date - Fetch bookings by date
+exports.getBookingsByDate = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Date: req.params.date });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by date', error: error.message });
+  }
+};
+
+// 15. GET /bookings/time/:time - Fetch bookings by time
+exports.getBookingsByTime = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Time: req.params.time });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by time', error: error.message });
+  }
+};
+
+// 16. GET /bookings/rating/driver/:rating - Fetch bookings by driver rating
+exports.getBookingsByDriverRating = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Driver_Ratings: Number(req.params.rating) });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by driver rating', error: error.message });
+  }
+};
+
+// 17. GET /bookings/rating/customer/:rating - Fetch bookings by customer rating
+exports.getBookingsByCustomerRating = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Customer_Rating: Number(req.params.rating) });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by customer rating', error: error.message });
+  }
+};
+
+// 18. GET /bookings/distance/:distance - Fetch bookings by ride distance
+exports.getBookingsByDistance = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Ride_Distance: Number(req.params.distance) });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by distance', error: error.message });
+  }
+};
+
+// 19. GET /bookings/value/:amount - Fetch bookings by fare value
+exports.getBookingsByValue = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Booking_Value: Number(req.params.amount) });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings by value', error: error.message });
+  }
+};
+
+// 20. GET /bookings/incomplete/:status - Fetch incomplete bookings
+exports.getIncompleteBookings = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Incomplete_Rides: "Yes", Incomplete_Rides_Reason: req.params.status });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching incomplete bookings', error: error.message });
+  }
+};
