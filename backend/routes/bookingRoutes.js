@@ -52,6 +52,54 @@ router.get('/value/:amount', bookingController.getBookingsByValue);
 // 20. GET /bookings/incomplete/:status - Fetch incomplete bookings
 router.get('/incomplete/:status', bookingController.getIncompleteBookings);
 
+// 21. GET /bookings/incomplete-reason/:reason - Fetch incomplete ride reasons
+router.get('/incomplete-reason/:reason', bookingController.getBookingsByIncompleteReason);
+
+// 22. GET /bookings/cancel/customer/:reason - Fetch customer cancellation reasons
+router.get('/cancel/customer/:reason', bookingController.getBookingsByCustomerCancelReason);
+
+// 23. GET /bookings/cancel/driver/:reason - Fetch driver cancellation reasons
+router.get('/cancel/driver/:reason', bookingController.getBookingsByDriverCancelReason);
+
+// 24. GET /bookings/vtat/:minutes - Fetch bookings by VTAT
+router.get('/vtat/:minutes', bookingController.getBookingsByVtat);
+
+// 25. GET /bookings/ctat/:minutes - Fetch bookings by CTAT
+router.get('/ctat/:minutes', bookingController.getBookingsByCtat);
+
+// 26. GET /bookings/day/:day - Fetch bookings by day
+router.get('/day/:day', bookingController.getBookingsByDay);
+
+// 27. GET /bookings/month/:month - Fetch bookings by month
+router.get('/month/:month', bookingController.getBookingsByMonth);
+
+// 28. GET /bookings/year/:year - Fetch bookings by year
+router.get('/year/:year', bookingController.getBookingsByYear);
+
+// 29. GET /bookings/hour/:hour - Fetch bookings by hour
+router.get('/hour/:hour', bookingController.getBookingsByHour);
+
+// 30. GET /bookings/minute/:minute - Fetch bookings by minute
+router.get('/minute/:minute', bookingController.getBookingsByMinute);
+
+// 31. GET /bookings/source/:pickup - Fetch bookings by pickup source
+router.get('/source/:pickup', bookingController.getBookingsBySource);
+
+// 32. GET /bookings/destination/:drop - Fetch bookings by destination
+router.get('/destination/:drop', bookingController.getBookingsByDestination);
+
+// 33. GET /bookings/vehicle-image/:imageName - Fetch vehicle image bookings
+router.get('/vehicle-image/:imageName', bookingController.getBookingsByVehicleImage);
+
+// 34. GET /bookings/fare/:value - Fetch bookings by fare
+router.get('/fare/:value', bookingController.getBookingsByFare);
+
+// 35. GET /bookings/customer/:customerId/history - Fetch customer booking history
+router.get('/customer/:customerId/history', bookingController.getCustomerBookingHistory);
+
+// 36. GET /bookings/customer/:customerId/latest - Fetch latest customer booking
+router.get('/customer/:customerId/latest', bookingController.getLatestCustomerBooking);
+
 // Parameter paths (must be after static ones like /status/:status)
 
 // 2. GET /bookings/:bookingId - Fetch booking by ID (MongoDB _id)
