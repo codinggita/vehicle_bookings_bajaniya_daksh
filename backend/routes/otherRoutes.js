@@ -11,4 +11,16 @@ router.get('/incomplete-rides', otherController.getIncompleteRides);
 router.get('/ratings', otherController.getRatings);
 router.get('/payments', otherController.getPayments);
 
+// POST routes for creation
+router.post('/customers', otherController.createCustomer);
+router.post('/drivers', otherController.createDriver);
+router.post('/payments', otherController.createPayment);
+router.post('/ratings', otherController.createRating);
+router.post('/vehicles', otherController.createVehicle);
+router.post('/locations', otherController.createLocation);
+
+// POST routes for bulk-insert
+router.post('/customers/bulk-insert', otherController.bulkInsertCustomers);
+router.post('/drivers/bulk-insert', otherController.bulkInsertDrivers);
+
 module.exports = router;

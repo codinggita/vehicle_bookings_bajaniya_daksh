@@ -96,3 +96,38 @@ exports.getAdminBookings = async (req, res) => {
     res.status(500).json({ message: 'Error fetching admin bookings', error: error.message });
   }
 };
+
+// --- POST Routes ---
+
+const createGenericRecord = async (req, res, recordName) => {
+  try {
+    const newRecord = new Data(req.body);
+    const savedRecord = await newRecord.save();
+    res.status(201).json({ message: `${recordName} created successfully`, data: savedRecord });
+  } catch (error) {
+    res.status(500).json({ message: `Error creating ${recordName}`, error: error.message });
+  }
+};
+
+const bulkInsertGeneric = async (req, res, recordName) => {
+  try {
+    if (!Array.isArray(req.body)) {
+      return res.status(400).json({ message: 'Request body must be an array of objects' });
+    }
+    const insertedRecords = await Data.insertMany(req.body);
+    res.status(201).json({ message: `${recordName} bulk inserted successfully`, count: insertedRecords.length });
+  } catch (error) {
+    res.status(500).json({ message: `Error during bulk insert of ${recordName}`, error: error.message });
+  }
+};
+
+exports.createCustomer = (req, res) => createGenericRecord(req, res, 'Customer');
+exports.createDriver = (req, res) => createGenericRecord(req, res, 'Driver');
+exports.createPayment = (req, res) => createGenericRecord(req, res, 'Payment');
+exports.createRating = (req, res) => createGenericRecord(req, res, 'Rating');
+exports.createVehicle = (req, res) => createGenericRecord(req, res, 'Vehicle');
+exports.createLocation = (req, res) => createGenericRecord(req, res, 'Location');
+
+exports.bulkInsertBookings = (req, res) => bulkInsertGeneric(req, res, 'Bookings');
+exports.bulkInsertCustomers = (req, res) => bulkInsertGeneric(req, res, 'Customers');
+exports.bulkInsertDrivers = (req, res) => bulkInsertGeneric(req, res, 'Drivers');

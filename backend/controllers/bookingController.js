@@ -137,6 +137,22 @@ exports.updateBookingStatus = async (req, res) => {
   }
 };
 
+// 150. PATCH /bookings/:bookingId/payment - Update booking payment
+exports.updateBookingPayment = async (req, res) => {
+  try {
+    const { paymentMethod } = req.body;
+    const updatedBooking = await Data.findByIdAndUpdate(
+      req.params.bookingId,
+      { Payment_Method: paymentMethod },
+      { new: true }
+    );
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
+    res.status(200).json(updatedBooking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating booking payment', error: error.message });
+  }
+};
+
 // 6. DELETE /bookings/:bookingId - Delete booking
 exports.deleteBooking = async (req, res) => {
   try {
