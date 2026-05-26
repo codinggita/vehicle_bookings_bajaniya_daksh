@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const bookingController = require('../controllers/bookingController');
+const otherController = require('../controllers/otherController');
 
 // 1. GET /bookings - Fetch all bookings
 router.get('/', bookingController.getAllBookings);
 
 // 3. POST /bookings - Create new booking
 router.post('/', bookingController.createBooking);
+
+// POST /bookings/bulk-insert - Bulk insert bookings
+router.post('/bulk-insert', otherController.bulkInsertBookings);
 
 // Note: specific static prefix paths should be defined before parameter paths to avoid route collision
 
@@ -110,6 +114,9 @@ router.put('/:bookingId', bookingController.updateBooking);
 
 // 5. PATCH /bookings/:bookingId/status - Update booking status
 router.patch('/:bookingId/status', bookingController.updateBookingStatus);
+
+// PATCH /bookings/:bookingId/payment - Update booking payment
+router.patch('/:bookingId/payment', bookingController.updateBookingPayment);
 
 // 6. DELETE /bookings/:bookingId - Delete booking
 router.delete('/:bookingId', bookingController.deleteBooking);
