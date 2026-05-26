@@ -1,9 +1,16 @@
 const Data = require('../models/Data');
 
-// 1. GET /bookings - Fetch all bookings
+// 1. GET /bookings - Fetch all bookings (Updated to support Query Parameters for next 4 'routes')
 exports.getAllBookings = async (req, res) => {
   try {
-    const bookings = await Data.find({});
+    const { status, vehicle, payment, pickup } = req.query;
+    const filter = {};
+    if (status) filter.Booking_Status = status;
+    if (vehicle) filter.Vehicle_Type = vehicle;
+    if (payment) filter.Payment_Method = payment;
+    if (pickup) filter.Pickup_Location = pickup;
+
+    const bookings = await Data.find(filter);
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings', error: error.message });
@@ -212,5 +219,166 @@ exports.getIncompleteBookings = async (req, res) => {
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching incomplete bookings', error: error.message });
+  }
+};
+
+// 21. GET /bookings/incomplete-reason/:reason - Fetch incomplete ride reasons
+exports.getBookingsByIncompleteReason = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Incomplete_Rides_Reason: req.params.reason });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by incomplete reason', error: error.message });
+  }
+};
+
+// 22. GET /bookings/cancel/customer/:reason - Fetch customer cancellation reasons
+exports.getBookingsByCustomerCancelReason = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Canceled_Rides_by_Customer: req.params.reason });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by customer cancel reason', error: error.message });
+  }
+};
+
+// 23. GET /bookings/cancel/driver/:reason - Fetch driver cancellation reasons
+exports.getBookingsByDriverCancelReason = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Canceled_Rides_by_Driver: req.params.reason });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by driver cancel reason', error: error.message });
+  }
+};
+
+// 24. GET /bookings/vtat/:minutes - Fetch bookings by VTAT
+exports.getBookingsByVtat = async (req, res) => {
+  try {
+    const bookings = await Data.find({ V_TAT: req.params.minutes });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by VTAT', error: error.message });
+  }
+};
+
+// 25. GET /bookings/ctat/:minutes - Fetch bookings by CTAT
+exports.getBookingsByCtat = async (req, res) => {
+  try {
+    const bookings = await Data.find({ C_TAT: req.params.minutes });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by CTAT', error: error.message });
+  }
+};
+
+// 26. GET /bookings/day/:day - Fetch bookings by day
+exports.getBookingsByDay = async (req, res) => {
+  try {
+    // Note: Assuming date field holds the exact day, or requires aggregation/date math based on schema
+    const bookings = await Data.find({ Day: req.params.day }); // Simple assumption
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by day', error: error.message });
+  }
+};
+
+// 27. GET /bookings/month/:month - Fetch bookings by month
+exports.getBookingsByMonth = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Month: req.params.month });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by month', error: error.message });
+  }
+};
+
+// 28. GET /bookings/year/:year - Fetch bookings by year
+exports.getBookingsByYear = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Year: req.params.year });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by year', error: error.message });
+  }
+};
+
+// 29. GET /bookings/hour/:hour - Fetch bookings by hour
+exports.getBookingsByHour = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Hour: req.params.hour });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by hour', error: error.message });
+  }
+};
+
+// 30. GET /bookings/minute/:minute - Fetch bookings by minute
+exports.getBookingsByMinute = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Minute: req.params.minute });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by minute', error: error.message });
+  }
+};
+
+// 31. GET /bookings/source/:pickup - Fetch bookings by pickup source
+exports.getBookingsBySource = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Pickup_Location: req.params.pickup });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by source', error: error.message });
+  }
+};
+
+// 32. GET /bookings/destination/:drop - Fetch bookings by destination
+exports.getBookingsByDestination = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Drop_Location: req.params.drop });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by destination', error: error.message });
+  }
+};
+
+// 33. GET /bookings/vehicle-image/:imageName - Fetch vehicle image bookings
+exports.getBookingsByVehicleImage = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Vehicle_Image: req.params.imageName });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by vehicle image', error: error.message });
+  }
+};
+
+// 34. GET /bookings/fare/:value - Fetch bookings by fare
+exports.getBookingsByFare = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Booking_Value: Number(req.params.value) });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching by fare', error: error.message });
+  }
+};
+
+// 35. GET /bookings/customer/:customerId/history - Fetch customer booking history
+exports.getCustomerBookingHistory = async (req, res) => {
+  try {
+    const bookings = await Data.find({ Customer_ID: req.params.customerId }).sort({ Date: -1 });
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching customer history', error: error.message });
+  }
+};
+
+// 36. GET /bookings/customer/:customerId/latest - Fetch latest customer booking
+exports.getLatestCustomerBooking = async (req, res) => {
+  try {
+    const booking = await Data.findOne({ Customer_ID: req.params.customerId }).sort({ Date: -1, Time: -1 });
+    res.status(200).json(booking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching latest customer booking', error: error.message });
   }
 };
