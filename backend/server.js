@@ -21,7 +21,12 @@ mongoose.connect(uri)
 
 // Models
 const bookingRoutes = require('./routes/bookingRoutes');
+const otherRoutes = require('./routes/otherRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api', otherRoutes);
 
 app.get('/', (req, res) => {
   res.send('Vehicle Booking API is running...');
