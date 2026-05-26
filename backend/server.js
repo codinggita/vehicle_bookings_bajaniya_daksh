@@ -24,11 +24,15 @@ const otherRoutes = require('./routes/otherRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const statsRoutes = require('./routes/statsRoutes');
+const authRoutes = require('./routes/authRoutes');
+const jwtRoutes = require('./routes/jwtRoutes');
 
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/jwt', jwtRoutes);
 app.use('/api', otherRoutes);
 
 app.get('/', (req, res) => {
