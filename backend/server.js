@@ -19,13 +19,14 @@ mongoose.connect(uri)
     console.error('Error connecting to MongoDB:', error);
   });
 
-// Models
 const bookingRoutes = require('./routes/bookingRoutes');
 const otherRoutes = require('./routes/otherRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/search', searchRoutes);
 app.use('/api', otherRoutes);
 
 app.get('/', (req, res) => {
