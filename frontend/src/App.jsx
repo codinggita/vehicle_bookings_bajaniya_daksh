@@ -48,8 +48,8 @@ const App = () => {
         <Suspense fallback={loadingFallback}>
           <Routes>
             {/* Public Routes */}
-            <Route path="/login" element={<TempComponent title="Login Page" />} />
-            <Route path="/register" element={<TempComponent title="Register Page" />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             
             {/* Redirect root to login */}
             <Route path="/" element={<Navigate to="/login" replace />} />
@@ -60,13 +60,13 @@ const App = () => {
                 
                 {/* Admin Only Routes */}
                 <Route element={<RoleRoute requiredRole="Admin" />}>
-                  <Route path="/admin/dashboard" element={<TempComponent title="Admin Dashboard" />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
                   <Route path="/admin/bookings" element={<TempComponent title="Admin Bookings Management" />} />
                 </Route>
 
                 {/* User Only Routes */}
                 <Route element={<RoleRoute requiredRole="User" />}>
-                  <Route path="/user/dashboard" element={<TempComponent title="User Dashboard" />} />
+                  <Route path="/user/dashboard" element={<UserDashboard />} />
                   <Route path="/user/bookings" element={<TempComponent title="User Bookings History" />} />
                 </Route>
 
