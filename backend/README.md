@@ -1,45 +1,98 @@
-# Vehicle Booking Backend API
+# 🚗 Vehicle Booking Backend API
 
-This backend provides a RESTful API for a vehicle booking system, designed using Node.js, Express.js, and MongoDB. The architecture strictly follows the MVC (Model-View-Controller) pattern with normalized database schemas and clean separation of concerns.
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)](https://jwt.io/)
 
-## 🚀 Features & Evaluation Criteria Completed
-- **Clean MVC Architecture**: Business logic is separated into `services/`, and HTTP handling is managed by `controllers/`.
-- **Relational MongoDB Schemas**: Normalized models (`Booking`, `Customer`, `Driver`, `Vehicle`) with strict field validation, enums, and timestamp tracking.
-- **Advanced Querying**: Search, filtering, pagination, and sorting on bookings.
-- **Aggregation Pipelines**: Data aggregation endpoints (e.g., top vehicles, fare stats).
-- **JWT Authentication**: Secure user authentication.
-- **Centralized Error Handling**: `catchAsync` wrapper removes redundant try-catch blocks.
-- **Standardized API Responses**: Every API returns a consistent `{ success, message, data, error }` JSON structure.
-- **Environment Configuration**: Centralized DB setup in `config/db.js`.
-- **Request Logging**: Custom middleware to log incoming HTTP requests.
+A robust, scalable, and fully normalized RESTful API for a Vehicle Booking System, built with Node.js, Express, and MongoDB. This backend strictly adheres to the Model-View-Controller (MVC) architectural pattern.
+
+## 🌟 Features
+
+- **Strict MVC Architecture:** Clean separation of concerns with dedicated controllers, services, and models.
+- **Normalized Relational Schema:** Data is intelligently distributed across `Booking`, `Customer`, `Driver`, and `Vehicle` collections.
+- **JWT Authentication:** Secure Role-Based Access Control (RBAC) with hashed passwords.
+- **Advanced Querying & Aggregation:** High-performance data retrieval supporting pagination, sorting, Regex-based searching, and complex MongoDB aggregation pipelines.
+- **Centralized Error Handling:** Global async error wrapper (`catchAsync`) prevents unhandled promise rejections.
+- **Standardized API Responses:** Uniform JSON response structure (`{ success, message, data, error }`) across all endpoints.
+- **Request Logging:** Custom middleware for tracking incoming HTTP requests.
+
+## 🛠️ Tech Stack
+
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Database:** MongoDB (via Mongoose ODM)
+- **Security:** JSON Web Tokens (JWT), bcryptjs, CORS
 
 ## 📁 Folder Structure
-- `config/` - Environment variables and database connection (`db.js`).
-- `controllers/` - Express route handlers parsing requests and returning responses.
-- `middleware/` - Custom middleware (JWT auth, Request Logger, Rate Limiting).
-- `models/` - Mongoose schemas (relational DB structure).
-- `routes/` - API route definitions.
-- `services/` - Business logic and MongoDB queries (decoupled from controllers).
-- `utils/` - Utility functions (`catchAsync.js`, `responseHandler.js`).
 
-## ⚙️ Setup Instructions
-1. **Install Dependencies**: `npm install`
-2. **Environment Variables**: Create a `.env` file in the root backend directory:
+```text
+backend/
+├── config/           # Environment variables and database connection
+├── controllers/      # Express route handlers (Request/Response logic)
+├── middleware/       # Custom middleware (JWT auth, Logging, Rate Limiting)
+├── models/           # Mongoose schemas (Relational DB structure)
+├── routes/           # API route definitions
+├── services/         # Core business logic and MongoDB queries
+├── utils/            # Helper utilities (catchAsync, responseHandler)
+├── server.js         # Application entry point
+└── .env              # Environment configuration variables
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [Node.js](https://nodejs.org/en/download/) (v14 or higher)
+- [MongoDB](https://www.mongodb.com/try/download/community) (Local instance or MongoDB Atlas URI)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/daksh006v/vehicle_bookings_bajaniya_daksh.git
+   cd vehicle_bookings_bajaniya_daksh/backend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables**
+   Create a `.env` file in the root of the `backend/` directory:
    ```env
    PORT=5000
    MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
+   JWT_SECRET=your_super_secret_jwt_key
    NODE_ENV=development
    ```
-3. **Run Server**: 
-   - Development: `npm run dev` (if nodemon is installed)
-   - Production: `node server.js`
 
-## 🗄️ Data Migration / Seeding
-Since the schema was upgraded from a generic flat `Data` model to normalized relational collections (`Customer`, `Driver`, `Vehicle`, `Booking`), you will need to seed your database using the new schema structure. Ensure that `Customer_ID`, `Driver_ID`, and `Vehicle_Type` in your `Booking` references match the actual documents in those respective collections.
+4. **Start the Server**
+   - Development Mode (with hot-reloading):
+     ```bash
+     npm run dev
+     ```
+   - Production Mode:
+     ```bash
+     npm start
+     ```
 
-## 🧪 Postman API Testing
-To test these APIs via Postman:
-1. Export your Postman collection and include it in this repository (e.g., `Vehicle_Booking.postman_collection.json`).
-2. The Base URL is `http://localhost:5000/api`.
-3. Use the `/api/auth/login` endpoint to retrieve a JWT token, and place it in the **Authorization** header (`Bearer <token>`) for protected routes.
+## 🗄️ Database & Schema Design
+This project migrated from a flat schema to a deeply normalized relational database:
+- **`Customer`**: User identities and customer ratings.
+- **`Driver`**: Driver identities and performance metrics.
+- **`Vehicle`**: Vehicle configurations and types.
+- **`Booking`**: The core transactional model containing references (`ObjectId`) to Customers, Drivers, and Vehicles.
+
+> **Note on Data Seeding:** If migrating from legacy datasets, ensure your data is properly seeded into these four distinct collections to prevent broken references.
+
+## 📖 API Documentation & Testing
+
+A complete Postman collection is included in this repository to facilitate immediate API testing.
+
+1. Open Postman.
+2. Click **Import** and select the `Vehicle_Booking.postman_collection.json` file located in the root of the `backend/` directory.
+3. Authenticate via `/api/auth/login` to retrieve your JWT, and place it in the `Authorization` header (`Bearer <token>`) for protected routes.
+
+## 📄 License
+This project is proprietary and developed for evaluation purposes.
