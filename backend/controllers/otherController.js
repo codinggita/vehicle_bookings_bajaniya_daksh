@@ -1,4 +1,6 @@
-const Data = require('../models/Data');
+const bookingService = require('../services/bookingService');
+const catchAsync = require('../utils/catchAsync');
+const sendResponse = require('../utils/responseHandler');
 
 // Utility function to handle pagination
 const getPagination = (req) => {
@@ -13,7 +15,7 @@ exports.getCustomers = async (req, res) => {
     const { skip, limit } = getPagination(req);
     // As we don't have a separate customers collection, return distinct customer fields or full bookings
     // We'll return full bookings with just the customer details for simplicity
-    const customers = await Data.find({}, 'Customer_ID Customer_Rating').skip(skip).limit(limit);
+    const customers = await bookingService.findBookings({}, 'Customer_ID Customer_Rating').skip(skip).limit(limit);
     res.status(200).json(customers);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching customers', error: error.message });
@@ -24,7 +26,7 @@ exports.getCustomers = async (req, res) => {
 exports.getVehicles = async (req, res) => {
   try {
     const { skip, limit } = getPagination(req);
-    const vehicles = await Data.find({}, 'Vehicle_Type Vehicle_Image').skip(skip).limit(limit);
+    const vehicles = await bookingService.findBookings({}, 'Vehicle_Type Vehicle_Image').skip(skip).limit(limit);
     res.status(200).json(vehicles);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching vehicles', error: error.message });
@@ -35,7 +37,7 @@ exports.getVehicles = async (req, res) => {
 exports.getSuccessRides = async (req, res) => {
   try {
     const { skip, limit } = getPagination(req);
-    const rides = await Data.find({ Booking_Status: 'Success' }).skip(skip).limit(limit);
+    const rides = await bookingService.findBookings({ Booking_Status: 'Success' }).skip(skip).limit(limit);
     res.status(200).json(rides);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching successful rides', error: error.message });
@@ -46,7 +48,7 @@ exports.getSuccessRides = async (req, res) => {
 exports.getCancelledRides = async (req, res) => {
   try {
     const { skip, limit } = getPagination(req);
-    const rides = await Data.find({ Booking_Status: /Canceled/i }).skip(skip).limit(limit);
+    const rides = await bookingService.findBookings({ Booking_Status: /Canceled/i }).skip(skip).limit(limit);
     res.status(200).json(rides);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching cancelled rides', error: error.message });
@@ -57,7 +59,7 @@ exports.getCancelledRides = async (req, res) => {
 exports.getIncompleteRides = async (req, res) => {
   try {
     const { skip, limit } = getPagination(req);
-    const rides = await Data.find({ Incomplete_Rides: 'Yes' }).skip(skip).limit(limit);
+    const rides = await bookingService.findBookings({ Incomplete_Rides: 'Yes' }).skip(skip).limit(limit);
     res.status(200).json(rides);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching incomplete rides', error: error.message });
@@ -68,7 +70,7 @@ exports.getIncompleteRides = async (req, res) => {
 exports.getRatings = async (req, res) => {
   try {
     const { skip, limit } = getPagination(req);
-    const ratings = await Data.find({}, 'Driver_Ratings Customer_Rating').skip(skip).limit(limit);
+    const ratings = await bookingService.findBookings({}, 'Driver_Ratings Customer_Rating').skip(skip).limit(limit);
     res.status(200).json(ratings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching ratings', error: error.message });
@@ -79,7 +81,7 @@ exports.getRatings = async (req, res) => {
 exports.getPayments = async (req, res) => {
   try {
     const { skip, limit } = getPagination(req);
-    const payments = await Data.find({}, 'Payment_Method Booking_Value').skip(skip).limit(limit);
+    const payments = await bookingService.findBookings({}, 'Payment_Method Booking_Value').skip(skip).limit(limit);
     res.status(200).json(payments);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching payments', error: error.message });
@@ -90,7 +92,7 @@ exports.getPayments = async (req, res) => {
 exports.getAdminBookings = async (req, res) => {
   try {
     const { skip, limit } = getPagination(req);
-    const bookings = await Data.find({}).skip(skip).limit(limit);
+    const bookings = await bookingService.findBookings({}).skip(skip).limit(limit);
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching admin bookings', error: error.message });
@@ -101,7 +103,7 @@ exports.getAdminBookings = async (req, res) => {
 
 const createGenericRecord = async (req, res, recordName) => {
   try {
-    const newRecord = new Data(req.body);
+    const newRecord = new (require('../models/Booking'))(req.body);
     const savedRecord = await newRecord.save();
     res.status(201).json({ message: `${recordName} created successfully`, data: savedRecord });
   } catch (error) {
@@ -136,7 +138,7 @@ exports.bulkInsertDrivers = (req, res) => bulkInsertGeneric(req, res, 'Drivers')
 
 exports.replaceCustomer = async (req, res) => {
   try {
-    const updated = await Data.findByIdAndUpdate(req.params.customerId, req.body, { new: true, overwrite: true });
+    const updated = await bookingService.findBookingsByIdAndUpdate(req.params.customerId, req.body, { new: true, overwrite: true });
     if (!updated) return res.status(404).json({ message: 'Customer not found' });
     res.status(200).json(updated);
   } catch (error) {
@@ -146,7 +148,7 @@ exports.replaceCustomer = async (req, res) => {
 
 exports.replaceDriver = async (req, res) => {
   try {
-    const updated = await Data.findByIdAndUpdate(req.params.driverId, req.body, { new: true, overwrite: true });
+    const updated = await bookingService.findBookingsByIdAndUpdate(req.params.driverId, req.body, { new: true, overwrite: true });
     if (!updated) return res.status(404).json({ message: 'Driver not found' });
     res.status(200).json(updated);
   } catch (error) {
@@ -156,7 +158,7 @@ exports.replaceDriver = async (req, res) => {
 
 exports.replaceVehicle = async (req, res) => {
   try {
-    const updated = await Data.findByIdAndUpdate(req.params.vehicleId, req.body, { new: true, overwrite: true });
+    const updated = await bookingService.findBookingsByIdAndUpdate(req.params.vehicleId, req.body, { new: true, overwrite: true });
     if (!updated) return res.status(404).json({ message: 'Vehicle not found' });
     res.status(200).json(updated);
   } catch (error) {
@@ -168,7 +170,7 @@ exports.replaceVehicle = async (req, res) => {
 
 exports.deleteCustomer = async (req, res) => {
   try {
-    const deleted = await Data.findByIdAndDelete(req.params.customerId);
+    const deleted = await bookingService.findBookingsByIdAndDelete(req.params.customerId);
     if (!deleted) return res.status(404).json({ message: 'Customer not found' });
     res.status(200).json({ message: 'Customer deleted successfully' });
   } catch (error) {
@@ -178,7 +180,7 @@ exports.deleteCustomer = async (req, res) => {
 
 exports.deleteDriver = async (req, res) => {
   try {
-    const deleted = await Data.findByIdAndDelete(req.params.driverId);
+    const deleted = await bookingService.findBookingsByIdAndDelete(req.params.driverId);
     if (!deleted) return res.status(404).json({ message: 'Driver not found' });
     res.status(200).json({ message: 'Driver deleted successfully' });
   } catch (error) {
@@ -188,7 +190,7 @@ exports.deleteDriver = async (req, res) => {
 
 exports.deleteVehicle = async (req, res) => {
   try {
-    const deleted = await Data.findByIdAndDelete(req.params.vehicleId);
+    const deleted = await bookingService.findBookingsByIdAndDelete(req.params.vehicleId);
     if (!deleted) return res.status(404).json({ message: 'Vehicle not found' });
     res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (error) {
@@ -198,7 +200,7 @@ exports.deleteVehicle = async (req, res) => {
 
 exports.deletePayment = async (req, res) => {
   try {
-    const deleted = await Data.findByIdAndDelete(req.params.paymentId);
+    const deleted = await bookingService.findBookingsByIdAndDelete(req.params.paymentId);
     if (!deleted) return res.status(404).json({ message: 'Payment not found' });
     res.status(200).json({ message: 'Payment deleted successfully' });
   } catch (error) {
@@ -208,7 +210,7 @@ exports.deletePayment = async (req, res) => {
 
 exports.deleteRating = async (req, res) => {
   try {
-    const deleted = await Data.findByIdAndDelete(req.params.ratingId);
+    const deleted = await bookingService.findBookingsByIdAndDelete(req.params.ratingId);
     if (!deleted) return res.status(404).json({ message: 'Rating not found' });
     res.status(200).json({ message: 'Rating deleted successfully' });
   } catch (error) {
@@ -218,7 +220,7 @@ exports.deleteRating = async (req, res) => {
 
 exports.deleteLog = async (req, res) => {
   try {
-    const deleted = await Data.findByIdAndDelete(req.params.id);
+    const deleted = await bookingService.findBookingsByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: 'Log not found' });
     res.status(200).json({ message: 'Log deleted successfully' });
   } catch (error) {
@@ -228,7 +230,7 @@ exports.deleteLog = async (req, res) => {
 
 exports.deleteAllCustomers = async (req, res) => {
   try {
-    const result = await Data.deleteMany({});
+    const result = await bookingService.deleteAllBookings();
     res.status(200).json({ message: 'All customers deleted successfully', count: result.deletedCount });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting all customers', error: error.message });
@@ -237,7 +239,7 @@ exports.deleteAllCustomers = async (req, res) => {
 
 exports.deleteAllCancelledRides = async (req, res) => {
   try {
-    const result = await Data.deleteMany({ Booking_Status: /Canceled/i });
+    const result = await bookingService.deleteAllBookings();
     res.status(200).json({ message: 'All cancelled rides deleted', count: result.deletedCount });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting cancelled rides', error: error.message });
