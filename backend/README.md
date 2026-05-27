@@ -86,6 +86,58 @@ This project migrated from a flat schema to a deeply normalized relational datab
 
 > **Note on Data Seeding:** If migrating from legacy datasets, ensure your data is properly seeded into these four distinct collections to prevent broken references.
 
+## 🌐 API Endpoints Reference
+
+Below is a detailed overview of the core endpoints exposed by the backend. All routes are prefixed with `/api`. The API extensively supports query parameters for filtering, sorting, and pagination.
+
+### 🔐 Authentication & Users (`/api/auth`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/auth/register` | Register a new user account | Public |
+| **POST** | `/auth/login` | Login and receive JWT token | Public |
+| **GET** | `/auth/me` | Fetch authenticated user profile | Private (JWT) |
+
+### 📅 Bookings Core (`/api/bookings`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/bookings` | Fetch all bookings (supports `page`, `limit`, `sort`) | Public |
+| **GET** | `/bookings/:bookingId` | Fetch a specific booking by ID | Public |
+| **POST** | `/bookings` | Create a new booking | Public |
+| **PATCH** | `/bookings/:bookingId/status` | Partially update a booking's status | Public |
+| **PUT** | `/bookings/:bookingId` | Completely replace a booking | Public |
+| **DELETE**| `/bookings/:bookingId` | Delete a booking | Public |
+
+*Advanced Booking Queries (Examples):*
+- `GET /api/bookings?status=Success` (Filter by status)
+- `GET /api/bookings?minFare=500&maxFare=2000` (Filter by fare range)
+- `GET /api/bookings?sort=-Booking_Value` (Sort descending by fare)
+
+### 🔍 Search & Filtering (`/api/search`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/search?keyword=...` | Global case-insensitive regex search across fields | Public |
+| **GET** | `/search/location?pickup=...` | Search specifically by pickup or drop location | Public |
+| **GET** | `/search/vehicle?type=...` | Search by vehicle type | Public |
+| **GET** | `/search/payment?method=...` | Search by payment method (e.g., UPI, Cash) | Public |
+| **GET** | `/search/rating?driver=...` | Search by specific driver or customer ratings | Public |
+
+### 📊 Statistics & Aggregation (`/api/stats`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/stats/total-bookings` | Aggregated count of total platform bookings | Public |
+| **GET** | `/stats/success-rides` | Aggregated count of completed/successful rides | Public |
+| **GET** | `/stats/cancelled-rides`| Aggregated count of cancelled rides | Public |
+| **GET** | `/stats/highest-fare` | Retrieve the highest fare ever recorded | Public |
+| **GET** | `/stats/top-vehicle` | Retrieve the most frequently booked vehicle type | Public |
+
+### 🛡️ Admin & Protected Routes (`/api/admin`)
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/admin/dashboard` | Access admin dashboard statistics | Admin Only |
+| **GET** | `/admin/bookings` | Fetch all bookings with admin visibility | Admin Only |
+| **PATCH** | `/admin/bookings/:id` | Force update any booking record | Admin Only |
+| **DELETE**| `/admin/bookings/:id` | Force delete any booking record | Admin Only |
+
 ## 📖 API Documentation & Testing
 
 A complete Postman collection is included in this repository to facilitate immediate API testing.
