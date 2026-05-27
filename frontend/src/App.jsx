@@ -13,6 +13,7 @@ import RoleRoute from './components/auth/RoleRoute';
 const Login = lazy(() => import('./pages/auth/Login'));
 const Register = lazy(() => import('./pages/auth/Register'));
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminBookings = lazy(() => import('./pages/admin/Bookings'));
 const UserDashboard = lazy(() => import('./pages/user/Dashboard'));
 
 // Temporary mock components until we build the real ones
@@ -61,7 +62,7 @@ const App = () => {
                 {/* Admin Only Routes */}
                 <Route element={<RoleRoute requiredRole="Admin" />}>
                   <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                  <Route path="/admin/bookings" element={<TempComponent title="Admin Bookings Management" />} />
+                  <Route path="/admin/bookings" element={<AdminBookings />} />
                 </Route>
 
                 {/* User Only Routes */}
