@@ -1,4 +1,6 @@
-const Data = require('../models/Data');
+const bookingService = require('../services/bookingService');
+const catchAsync = require('../utils/catchAsync');
+const sendResponse = require('../utils/responseHandler');
 
 // 1. GET /bookings - Fetch all bookings (Enhanced for next 20 query parameter routes)
 exports.getAllBookings = async (req, res) => {
@@ -62,7 +64,7 @@ exports.getAllBookings = async (req, res) => {
     const skip = (pageNum - 1) * limitNum;
 
     // Query execution
-    let query = Data.find(filter).skip(skip).limit(limitNum);
+    let query = bookingService.findBookings(filter).skip(skip).limit(limitNum);
 
     // Sorting
     if (sort) {
@@ -87,7 +89,7 @@ exports.getAllBookings = async (req, res) => {
 // 2. GET /bookings/:bookingId - Fetch booking by _id (or Booking_ID if preferred, but _id is standard for generic ID)
 exports.getBookingById = async (req, res) => {
   try {
-    const booking = await Data.findById(req.params.bookingId);
+    const booking = await bookingService.findBookingsById(req.params.bookingId);
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json(booking);
   } catch (error) {
@@ -98,7 +100,7 @@ exports.getBookingById = async (req, res) => {
 // 3. POST /bookings - Create new booking
 exports.createBooking = async (req, res) => {
   try {
-    const newBooking = new Data(req.body);
+    const newBooking = new (require('../models/Booking'))(req.body);
     const savedBooking = await newBooking.save();
     res.status(201).json(savedBooking);
   } catch (error) {
@@ -109,7 +111,7 @@ exports.createBooking = async (req, res) => {
 // 4. PUT /bookings/:bookingId - Replace booking details
 exports.updateBooking = async (req, res) => {
   try {
-    const updatedBooking = await Data.findByIdAndUpdate(
+    const updatedBooking = await bookingService.findBookingsByIdAndUpdate(
       req.params.bookingId,
       req.body,
       { new: true, overwrite: true }
@@ -125,7 +127,7 @@ exports.updateBooking = async (req, res) => {
 exports.updateBookingStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const updatedBooking = await Data.findByIdAndUpdate(
+    const updatedBooking = await bookingService.findBookingsByIdAndUpdate(
       req.params.bookingId,
       { Booking_Status: status },
       { new: true }
@@ -141,7 +143,7 @@ exports.updateBookingStatus = async (req, res) => {
 exports.updateBookingPayment = async (req, res) => {
   try {
     const { paymentMethod } = req.body;
-    const updatedBooking = await Data.findByIdAndUpdate(
+    const updatedBooking = await bookingService.findBookingsByIdAndUpdate(
       req.params.bookingId,
       { Payment_Method: paymentMethod },
       { new: true }
@@ -160,7 +162,7 @@ exports.updateBookingRating = async (req, res) => {
     const updateData = {};
     if (driverRating !== undefined) updateData.Driver_Ratings = driverRating;
     if (customerRating !== undefined) updateData.Customer_Rating = customerRating;
-    const updatedBooking = await Data.findByIdAndUpdate(req.params.bookingId, updateData, { new: true });
+    const updatedBooking = await bookingService.findBookingsByIdAndUpdate(req.params.bookingId, updateData, { new: true });
     if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json(updatedBooking);
   } catch (error) {
@@ -172,7 +174,7 @@ exports.updateBookingRating = async (req, res) => {
 exports.updateBookingFare = async (req, res) => {
   try {
     const { fare } = req.body;
-    const updatedBooking = await Data.findByIdAndUpdate(req.params.bookingId, { Booking_Value: fare }, { new: true });
+    const updatedBooking = await bookingService.findBookingsByIdAndUpdate(req.params.bookingId, { Booking_Value: fare }, { new: true });
     if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json(updatedBooking);
   } catch (error) {
@@ -184,7 +186,7 @@ exports.updateBookingFare = async (req, res) => {
 exports.updateBookingDistance = async (req, res) => {
   try {
     const { distance } = req.body;
-    const updatedBooking = await Data.findByIdAndUpdate(req.params.bookingId, { Ride_Distance: distance }, { new: true });
+    const updatedBooking = await bookingService.findBookingsByIdAndUpdate(req.params.bookingId, { Ride_Distance: distance }, { new: true });
     if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json(updatedBooking);
   } catch (error) {
@@ -199,7 +201,7 @@ exports.updateBookingLocation = async (req, res) => {
     const updateData = {};
     if (pickup) updateData.Pickup_Location = pickup;
     if (drop) updateData.Drop_Location = drop;
-    const updatedBooking = await Data.findByIdAndUpdate(req.params.bookingId, updateData, { new: true });
+    const updatedBooking = await bookingService.findBookingsByIdAndUpdate(req.params.bookingId, updateData, { new: true });
     if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json(updatedBooking);
   } catch (error) {
@@ -210,7 +212,7 @@ exports.updateBookingLocation = async (req, res) => {
 // 6. DELETE /bookings/:bookingId - Delete booking
 exports.deleteBooking = async (req, res) => {
   try {
-    const deletedBooking = await Data.findByIdAndDelete(req.params.bookingId);
+    const deletedBooking = await bookingService.findBookingsByIdAndDelete(req.params.bookingId);
     if (!deletedBooking) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json({ message: 'Booking deleted successfully' });
   } catch (error) {
@@ -221,7 +223,7 @@ exports.deleteBooking = async (req, res) => {
 // DELETE /bookings/delete-all - Delete all bookings
 exports.deleteAllBookings = async (req, res) => {
   try {
-    const result = await Data.deleteMany({});
+    const result = await bookingService.deleteAllBookings();
     res.status(200).json({ message: 'All bookings deleted successfully', count: result.deletedCount });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting all bookings', error: error.message });
@@ -231,7 +233,7 @@ exports.deleteAllBookings = async (req, res) => {
 // 7. GET /bookings/id/:bookingId - Fetch booking by Booking_ID (Custom ID)
 exports.getBookingByBookingId = async (req, res) => {
   try {
-    const booking = await Data.findOne({ Booking_ID: req.params.bookingId });
+    const booking = await bookingService.findBookingsOne({ Booking_ID: req.params.bookingId });
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json(booking);
   } catch (error) {
@@ -242,7 +244,7 @@ exports.getBookingByBookingId = async (req, res) => {
 // 8. GET /bookings/status/:status - Fetch bookings by status
 exports.getBookingsByStatus = async (req, res) => {
   try {
-    const bookings = await Data.find({ Booking_Status: req.params.status });
+    const bookings = await bookingService.findBookings({ Booking_Status: req.params.status });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by status', error: error.message });
@@ -252,7 +254,7 @@ exports.getBookingsByStatus = async (req, res) => {
 // 9. GET /bookings/customer/:customerId - Fetch bookings by customer
 exports.getBookingsByCustomer = async (req, res) => {
   try {
-    const bookings = await Data.find({ Customer_ID: req.params.customerId });
+    const bookings = await bookingService.findBookings({ Customer_ID: req.params.customerId });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by customer', error: error.message });
@@ -262,7 +264,7 @@ exports.getBookingsByCustomer = async (req, res) => {
 // 10. GET /bookings/vehicle/:vehicleType - Fetch bookings by vehicle type
 exports.getBookingsByVehicle = async (req, res) => {
   try {
-    const bookings = await Data.find({ Vehicle_Type: req.params.vehicleType });
+    const bookings = await bookingService.findBookings({ Vehicle_Type: req.params.vehicleType });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by vehicle', error: error.message });
@@ -272,7 +274,7 @@ exports.getBookingsByVehicle = async (req, res) => {
 // 11. GET /bookings/payment/:method - Fetch bookings by payment method
 exports.getBookingsByPayment = async (req, res) => {
   try {
-    const bookings = await Data.find({ Payment_Method: req.params.method });
+    const bookings = await bookingService.findBookings({ Payment_Method: req.params.method });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by payment', error: error.message });
@@ -282,7 +284,7 @@ exports.getBookingsByPayment = async (req, res) => {
 // 12. GET /bookings/pickup/:location - Fetch bookings by pickup location
 exports.getBookingsByPickup = async (req, res) => {
   try {
-    const bookings = await Data.find({ Pickup_Location: req.params.location });
+    const bookings = await bookingService.findBookings({ Pickup_Location: req.params.location });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by pickup', error: error.message });
@@ -292,7 +294,7 @@ exports.getBookingsByPickup = async (req, res) => {
 // 13. GET /bookings/drop/:location - Fetch bookings by drop location
 exports.getBookingsByDrop = async (req, res) => {
   try {
-    const bookings = await Data.find({ Drop_Location: req.params.location });
+    const bookings = await bookingService.findBookings({ Drop_Location: req.params.location });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by drop', error: error.message });
@@ -302,7 +304,7 @@ exports.getBookingsByDrop = async (req, res) => {
 // 14. GET /bookings/date/:date - Fetch bookings by date
 exports.getBookingsByDate = async (req, res) => {
   try {
-    const bookings = await Data.find({ Date: req.params.date });
+    const bookings = await bookingService.findBookings({ Date: req.params.date });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by date', error: error.message });
@@ -312,7 +314,7 @@ exports.getBookingsByDate = async (req, res) => {
 // 15. GET /bookings/time/:time - Fetch bookings by time
 exports.getBookingsByTime = async (req, res) => {
   try {
-    const bookings = await Data.find({ Time: req.params.time });
+    const bookings = await bookingService.findBookings({ Time: req.params.time });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by time', error: error.message });
@@ -322,7 +324,7 @@ exports.getBookingsByTime = async (req, res) => {
 // 16. GET /bookings/rating/driver/:rating - Fetch bookings by driver rating
 exports.getBookingsByDriverRating = async (req, res) => {
   try {
-    const bookings = await Data.find({ Driver_Ratings: Number(req.params.rating) });
+    const bookings = await bookingService.findBookings({ Driver_Ratings: Number(req.params.rating) });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by driver rating', error: error.message });
@@ -332,7 +334,7 @@ exports.getBookingsByDriverRating = async (req, res) => {
 // 17. GET /bookings/rating/customer/:rating - Fetch bookings by customer rating
 exports.getBookingsByCustomerRating = async (req, res) => {
   try {
-    const bookings = await Data.find({ Customer_Rating: Number(req.params.rating) });
+    const bookings = await bookingService.findBookings({ Customer_Rating: Number(req.params.rating) });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by customer rating', error: error.message });
@@ -342,7 +344,7 @@ exports.getBookingsByCustomerRating = async (req, res) => {
 // 18. GET /bookings/distance/:distance - Fetch bookings by ride distance
 exports.getBookingsByDistance = async (req, res) => {
   try {
-    const bookings = await Data.find({ Ride_Distance: Number(req.params.distance) });
+    const bookings = await bookingService.findBookings({ Ride_Distance: Number(req.params.distance) });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by distance', error: error.message });
@@ -352,7 +354,7 @@ exports.getBookingsByDistance = async (req, res) => {
 // 19. GET /bookings/value/:amount - Fetch bookings by fare value
 exports.getBookingsByValue = async (req, res) => {
   try {
-    const bookings = await Data.find({ Booking_Value: Number(req.params.amount) });
+    const bookings = await bookingService.findBookings({ Booking_Value: Number(req.params.amount) });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings by value', error: error.message });
@@ -362,7 +364,7 @@ exports.getBookingsByValue = async (req, res) => {
 // 20. GET /bookings/incomplete/:status - Fetch incomplete bookings
 exports.getIncompleteBookings = async (req, res) => {
   try {
-    const bookings = await Data.find({ Incomplete_Rides: "Yes", Incomplete_Rides_Reason: req.params.status });
+    const bookings = await bookingService.findBookings({ Incomplete_Rides: "Yes", Incomplete_Rides_Reason: req.params.status });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching incomplete bookings', error: error.message });
@@ -372,7 +374,7 @@ exports.getIncompleteBookings = async (req, res) => {
 // 21. GET /bookings/incomplete-reason/:reason - Fetch incomplete ride reasons
 exports.getBookingsByIncompleteReason = async (req, res) => {
   try {
-    const bookings = await Data.find({ Incomplete_Rides_Reason: req.params.reason });
+    const bookings = await bookingService.findBookings({ Incomplete_Rides_Reason: req.params.reason });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by incomplete reason', error: error.message });
@@ -382,7 +384,7 @@ exports.getBookingsByIncompleteReason = async (req, res) => {
 // 22. GET /bookings/cancel/customer/:reason - Fetch customer cancellation reasons
 exports.getBookingsByCustomerCancelReason = async (req, res) => {
   try {
-    const bookings = await Data.find({ Canceled_Rides_by_Customer: req.params.reason });
+    const bookings = await bookingService.findBookings({ Canceled_Rides_by_Customer: req.params.reason });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by customer cancel reason', error: error.message });
@@ -392,7 +394,7 @@ exports.getBookingsByCustomerCancelReason = async (req, res) => {
 // 23. GET /bookings/cancel/driver/:reason - Fetch driver cancellation reasons
 exports.getBookingsByDriverCancelReason = async (req, res) => {
   try {
-    const bookings = await Data.find({ Canceled_Rides_by_Driver: req.params.reason });
+    const bookings = await bookingService.findBookings({ Canceled_Rides_by_Driver: req.params.reason });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by driver cancel reason', error: error.message });
@@ -402,7 +404,7 @@ exports.getBookingsByDriverCancelReason = async (req, res) => {
 // 24. GET /bookings/vtat/:minutes - Fetch bookings by VTAT
 exports.getBookingsByVtat = async (req, res) => {
   try {
-    const bookings = await Data.find({ V_TAT: req.params.minutes });
+    const bookings = await bookingService.findBookings({ V_TAT: req.params.minutes });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by VTAT', error: error.message });
@@ -412,7 +414,7 @@ exports.getBookingsByVtat = async (req, res) => {
 // 25. GET /bookings/ctat/:minutes - Fetch bookings by CTAT
 exports.getBookingsByCtat = async (req, res) => {
   try {
-    const bookings = await Data.find({ C_TAT: req.params.minutes });
+    const bookings = await bookingService.findBookings({ C_TAT: req.params.minutes });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by CTAT', error: error.message });
@@ -423,7 +425,7 @@ exports.getBookingsByCtat = async (req, res) => {
 exports.getBookingsByDay = async (req, res) => {
   try {
     // Note: Assuming date field holds the exact day, or requires aggregation/date math based on schema
-    const bookings = await Data.find({ Day: req.params.day }); // Simple assumption
+    const bookings = await bookingService.findBookings({ Day: req.params.day }); // Simple assumption
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by day', error: error.message });
@@ -433,7 +435,7 @@ exports.getBookingsByDay = async (req, res) => {
 // 27. GET /bookings/month/:month - Fetch bookings by month
 exports.getBookingsByMonth = async (req, res) => {
   try {
-    const bookings = await Data.find({ Month: req.params.month });
+    const bookings = await bookingService.findBookings({ Month: req.params.month });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by month', error: error.message });
@@ -443,7 +445,7 @@ exports.getBookingsByMonth = async (req, res) => {
 // 28. GET /bookings/year/:year - Fetch bookings by year
 exports.getBookingsByYear = async (req, res) => {
   try {
-    const bookings = await Data.find({ Year: req.params.year });
+    const bookings = await bookingService.findBookings({ Year: req.params.year });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by year', error: error.message });
@@ -453,7 +455,7 @@ exports.getBookingsByYear = async (req, res) => {
 // 29. GET /bookings/hour/:hour - Fetch bookings by hour
 exports.getBookingsByHour = async (req, res) => {
   try {
-    const bookings = await Data.find({ Hour: req.params.hour });
+    const bookings = await bookingService.findBookings({ Hour: req.params.hour });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by hour', error: error.message });
@@ -463,7 +465,7 @@ exports.getBookingsByHour = async (req, res) => {
 // 30. GET /bookings/minute/:minute - Fetch bookings by minute
 exports.getBookingsByMinute = async (req, res) => {
   try {
-    const bookings = await Data.find({ Minute: req.params.minute });
+    const bookings = await bookingService.findBookings({ Minute: req.params.minute });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by minute', error: error.message });
@@ -473,7 +475,7 @@ exports.getBookingsByMinute = async (req, res) => {
 // 31. GET /bookings/source/:pickup - Fetch bookings by pickup source
 exports.getBookingsBySource = async (req, res) => {
   try {
-    const bookings = await Data.find({ Pickup_Location: req.params.pickup });
+    const bookings = await bookingService.findBookings({ Pickup_Location: req.params.pickup });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by source', error: error.message });
@@ -483,7 +485,7 @@ exports.getBookingsBySource = async (req, res) => {
 // 32. GET /bookings/destination/:drop - Fetch bookings by destination
 exports.getBookingsByDestination = async (req, res) => {
   try {
-    const bookings = await Data.find({ Drop_Location: req.params.drop });
+    const bookings = await bookingService.findBookings({ Drop_Location: req.params.drop });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by destination', error: error.message });
@@ -493,7 +495,7 @@ exports.getBookingsByDestination = async (req, res) => {
 // 33. GET /bookings/vehicle-image/:imageName - Fetch vehicle image bookings
 exports.getBookingsByVehicleImage = async (req, res) => {
   try {
-    const bookings = await Data.find({ Vehicle_Image: req.params.imageName });
+    const bookings = await bookingService.findBookings({ Vehicle_Image: req.params.imageName });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by vehicle image', error: error.message });
@@ -503,7 +505,7 @@ exports.getBookingsByVehicleImage = async (req, res) => {
 // 34. GET /bookings/fare/:value - Fetch bookings by fare
 exports.getBookingsByFare = async (req, res) => {
   try {
-    const bookings = await Data.find({ Booking_Value: Number(req.params.value) });
+    const bookings = await bookingService.findBookings({ Booking_Value: Number(req.params.value) });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching by fare', error: error.message });
@@ -513,7 +515,7 @@ exports.getBookingsByFare = async (req, res) => {
 // 35. GET /bookings/customer/:customerId/history - Fetch customer booking history
 exports.getCustomerBookingHistory = async (req, res) => {
   try {
-    const bookings = await Data.find({ Customer_ID: req.params.customerId }).sort({ Date: -1 });
+    const bookings = await bookingService.findBookings({ Customer_ID: req.params.customerId }).sort({ Date: -1 });
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching customer history', error: error.message });
@@ -523,7 +525,7 @@ exports.getCustomerBookingHistory = async (req, res) => {
 // 36. GET /bookings/customer/:customerId/latest - Fetch latest customer booking
 exports.getLatestCustomerBooking = async (req, res) => {
   try {
-    const booking = await Data.findOne({ Customer_ID: req.params.customerId }).sort({ Date: -1, Time: -1 });
+    const booking = await bookingService.findBookingsOne({ Customer_ID: req.params.customerId }).sort({ Date: -1, Time: -1 });
     res.status(200).json(booking);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching latest customer booking', error: error.message });

@@ -1,11 +1,11 @@
 const Booking = require('../models/Booking');
 
-exports.getAllBookings = async (filter, skip, limitNum, sortFields) => {
+exports.getAllBookings = (filter, skip, limitNum, sortFields) => {
   let query = Booking.find(filter).skip(skip).limit(limitNum);
   if (sortFields) {
     query = query.sort(sortFields);
   }
-  return await query;
+  return query;
 };
 
 exports.getBookingById = async (id) => {
@@ -33,6 +33,10 @@ exports.findOneBooking = async (filter) => {
   return await Booking.findOne(filter);
 };
 
-exports.findBookings = async (filter) => {
-  return await Booking.find(filter);
+exports.findBookings = (filter) => {
+  return Booking.find(filter);
+};
+
+exports.aggregate = (pipeline) => {
+  return Booking.aggregate(pipeline);
 };

@@ -1,4 +1,6 @@
-const Data = require('../models/Data');
+const bookingService = require('../services/bookingService');
+const catchAsync = require('../utils/catchAsync');
+const sendResponse = require('../utils/responseHandler');
 
 // Utility function to handle pagination
 const getPagination = (req) => {
@@ -32,7 +34,7 @@ exports.searchAll = async (req, res) => {
       ]
     };
 
-    const results = await Data.find(query).skip(skip).limit(limit);
+    const results = await bookingService.findBookings(query).skip(skip).limit(limit);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ message: 'Error performing search', error: error.message });
@@ -49,7 +51,7 @@ exports.searchBookings = async (req, res) => {
       return res.status(400).json({ message: 'bookingId is required' });
     }
     
-    const results = await Data.find({ Booking_ID: new RegExp(bookingId, 'i') }).skip(skip).limit(limit);
+    const results = await bookingService.findBookings({ Booking_ID: new RegExp(bookingId, 'i') }).skip(skip).limit(limit);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ message: 'Error searching bookings', error: error.message });
@@ -66,7 +68,7 @@ exports.searchCustomers = async (req, res) => {
       return res.status(400).json({ message: 'customerId is required' });
     }
     
-    const results = await Data.find({ Customer_ID: new RegExp(customerId, 'i') }).skip(skip).limit(limit);
+    const results = await bookingService.findBookings({ Customer_ID: new RegExp(customerId, 'i') }).skip(skip).limit(limit);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ message: 'Error searching customers', error: error.message });
@@ -83,7 +85,7 @@ exports.searchPayment = async (req, res) => {
       return res.status(400).json({ message: 'method is required' });
     }
     
-    const results = await Data.find({ Payment_Method: new RegExp(method, 'i') }).skip(skip).limit(limit);
+    const results = await bookingService.findBookings({ Payment_Method: new RegExp(method, 'i') }).skip(skip).limit(limit);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ message: 'Error searching payments', error: error.message });
@@ -100,7 +102,7 @@ exports.searchVehicle = async (req, res) => {
       return res.status(400).json({ message: 'type is required' });
     }
     
-    const results = await Data.find({ Vehicle_Type: new RegExp(type, 'i') }).skip(skip).limit(limit);
+    const results = await bookingService.findBookings({ Vehicle_Type: new RegExp(type, 'i') }).skip(skip).limit(limit);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ message: 'Error searching vehicles', error: error.message });
@@ -117,7 +119,7 @@ exports.searchLocation = async (req, res) => {
     if (pickup) filter.Pickup_Location = new RegExp(pickup, 'i');
     if (drop) filter.Drop_Location = new RegExp(drop, 'i');
     
-    const results = await Data.find(filter).skip(skip).limit(limit);
+    const results = await bookingService.findBookings(filter).skip(skip).limit(limit);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ message: 'Error searching locations', error: error.message });
@@ -142,7 +144,7 @@ exports.searchCancelReason = async (req, res) => {
       ]
     };
     
-    const results = await Data.find(filter).skip(skip).limit(limit);
+    const results = await bookingService.findBookings(filter).skip(skip).limit(limit);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ message: 'Error searching cancel reasons', error: error.message });
@@ -159,7 +161,7 @@ exports.searchIncompleteReason = async (req, res) => {
       return res.status(400).json({ message: 'reason is required' });
     }
     
-    const results = await Data.find({ Incomplete_Rides_Reason: new RegExp(reason, 'i') }).skip(skip).limit(limit);
+    const results = await bookingService.findBookings({ Incomplete_Rides_Reason: new RegExp(reason, 'i') }).skip(skip).limit(limit);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ message: 'Error searching incomplete reasons', error: error.message });
@@ -176,7 +178,7 @@ exports.searchRating = async (req, res) => {
     if (driver) filter.Driver_Ratings = Number(driver);
     if (customer) filter.Customer_Rating = Number(customer);
     
-    const results = await Data.find(filter).skip(skip).limit(limit);
+    const results = await bookingService.findBookings(filter).skip(skip).limit(limit);
     res.status(200).json(results);
   } catch (error) {
     res.status(500).json({ message: 'Error searching ratings', error: error.message });

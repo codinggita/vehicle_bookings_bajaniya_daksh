@@ -1,11 +1,13 @@
-const Data = require('../models/Data');
+const bookingService = require('../services/bookingService');
+const catchAsync = require('../utils/catchAsync');
+const sendResponse = require('../utils/responseHandler');
 const pjson = require('../package.json');
 
 // GET /bookings/top/highest-fare
 exports.getHighestFareBookings = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit, 10) || 5;
-    const bookings = await Data.find().sort({ Booking_Value: -1 }).limit(limit);
+    const bookings = await bookingService.findBookings().sort({ Booking_Value: -1 }).limit(limit);
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching highest fare bookings', error: error.message });
@@ -16,7 +18,7 @@ exports.getHighestFareBookings = async (req, res) => {
 exports.getLowestFareBookings = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit, 10) || 5;
-    const bookings = await Data.find({ Booking_Value: { $gt: 0 } }).sort({ Booking_Value: 1 }).limit(limit);
+    const bookings = await bookingService.findBookings({ Booking_Value: { $gt: 0 } }).sort({ Booking_Value: 1 }).limit(limit);
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching lowest fare bookings', error: error.message });
@@ -28,7 +30,7 @@ exports.getRecentBookings = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit, 10) || 10;
     // Assuming Date and Time fields or _id can be used for sorting recent
-    const bookings = await Data.find().sort({ _id: -1 }).limit(limit);
+    const bookings = await bookingService.findBookings().sort({ _id: -1 }).limit(limit);
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching recent bookings', error: error.message });
@@ -39,7 +41,7 @@ exports.getRecentBookings = async (req, res) => {
 exports.getRandomBookings = async (req, res) => {
   try {
     const size = parseInt(req.query.limit, 10) || 5;
-    const bookings = await Data.aggregate([{ $sample: { size } }]);
+    const bookings = await bookingService.aggregate([{ $sample: { size } }]);
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching random bookings', error: error.message });
@@ -51,7 +53,7 @@ exports.getTrendingBookings = async (req, res) => {
   try {
     // Trending could mean most popular pickup locations recently
     const limit = parseInt(req.query.limit, 10) || 10;
-    const trending = await Data.aggregate([
+    const trending = await bookingService.aggregate([
       { $group: { _id: '$Pickup_Location', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: limit }
@@ -69,8 +71,8 @@ exports.compareBookings = async (req, res) => {
     if (!booking1 || !booking2) {
       return res.status(400).json({ message: 'booking1 and booking2 query parameters are required' });
     }
-    const b1 = await Data.findOne({ Booking_ID: booking1 });
-    const b2 = await Data.findOne({ Booking_ID: booking2 });
+    const b1 = await bookingService.findBookingsOne({ Booking_ID: booking1 });
+    const b2 = await bookingService.findBookingsOne({ Booking_ID: booking2 });
     
     if (!b1 || !b2) {
       return res.status(404).json({ message: 'One or both bookings not found' });

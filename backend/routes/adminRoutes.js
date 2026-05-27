@@ -3,7 +3,7 @@ const router = express.Router();
 const { verifyToken, requireAdmin } = require('../middleware/authMiddleware');
 const otherController = require('../controllers/otherController');
 const bookingController = require('../controllers/bookingController');
-const Data = require('../models/Data');
+const Booking = require('../models/Booking');
 
 // GET /admin/bookings - Paginated admin bookings (already in adminRoutes, adding auth guard)
 router.get('/bookings', verifyToken, requireAdmin, otherController.getAdminBookings);
@@ -17,7 +17,7 @@ router.delete('/bookings/:bookingId', verifyToken, requireAdmin, bookingControll
 // PATCH /admin/bookings/:bookingId - Admin update booking
 router.patch('/bookings/:bookingId', verifyToken, requireAdmin, async (req, res) => {
   try {
-    const updated = await Data.findByIdAndUpdate(req.params.bookingId, req.body, { new: true });
+    const updated = await Booking.findByIdAndUpdate(req.params.bookingId, req.body, { new: true });
     if (!updated) return res.status(404).json({ message: 'Booking not found' });
     res.status(200).json(updated);
   } catch (error) {
