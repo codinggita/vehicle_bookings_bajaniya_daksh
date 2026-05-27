@@ -3,9 +3,8 @@ import { useSelector } from 'react-redux';
 import { Box } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
 
-// Placeholders for Navbar and Sidebar to be built in Phase 3
-const Navbar = () => <Box sx={{ height: '64px', borderBottom: '1px solid #e0e0e0', p: 2 }}>Navbar</Box>;
-const Sidebar = () => <Box sx={{ width: '250px', borderRight: '1px solid #e0e0e0', p: 2 }}>Sidebar</Box>;
+import Navbar from './Navbar';
+import Sidebar from './Sidebar';
 
 const MainLayout = () => {
   const { sidebarOpen } = useSelector((state) => state.ui);
