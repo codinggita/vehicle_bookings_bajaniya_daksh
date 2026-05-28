@@ -1,8 +1,5 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-
-// In-memory user store for demonstration (replace with DB model in production)
-const users = [];
+const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'vehicle_booking_secret_key';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'vehicle_booking_refresh_secret';
@@ -10,20 +7,29 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'vehicle_booking_re
 // POST /auth/register
 exports.register = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: 'username, email and password are required' });
+    const { name, email, password, role } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'name, email and password are required' });
     }
-    const exists = users.find(u => u.email === email);
+
+    const exists = await User.findOne({ email });
     if (exists) {
-      return res.status(409).json({ message: 'User already exists with this email' });
+      return res.status(409).json({ success: false, message: 'User already exists with this email' });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = { id: Date.now().toString(), username, email, password: hashedPassword, role: role || 'user' };
-    users.push(newUser);
-    res.status(201).json({ message: 'User registered successfully', user: { id: newUser.id, username, email, role: newUser.role } });
+
+    // Normalize role to Title Case; default to 'User'
+    const normalizedRole = role === 'Admin' ? 'Admin' : 'User';
+
+    const newUser = await User.create({ name, email, password, role: normalizedRole });
+
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      data: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role },
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error registering user', error: error.message });
+    res.status(500).json({ success: false, message: 'Error registering user', error: error.message });
   }
 };
 
@@ -31,44 +37,60 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
-      return res.status(400).json({ message: 'email and password are required' });
+      return res.status(400).json({ success: false, message: 'email and password are required' });
     }
-    const user = users.find(u => u.email === email);
+
+    // select: false on password — must explicitly include it
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-    const refreshToken = jwt.sign({ id: user.id }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
-    res.status(200).json({ message: 'Login successful', token, refreshToken });
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    const refreshToken = jwt.sign({ id: user._id }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      token,
+      refreshToken,
+      data: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error logging in', error: error.message });
+    res.status(500).json({ success: false, message: 'Error logging in', error: error.message });
   }
 };
 
 // POST /auth/logout
 exports.logout = (req, res) => {
-  // Stateless JWT — client should discard token
-  res.status(200).json({ message: 'Logged out successfully' });
+  res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
 
 // POST /auth/forgot-password
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = users.find(u => u.email === email);
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'No user found with that email' });
+      return res.status(404).json({ success: false, message: 'No user found with that email' });
     }
-    const resetToken = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '15m' });
-    // In production, send email with reset link. Here we return it for testing.
-    res.status(200).json({ message: 'Password reset token generated', resetToken });
+    const resetToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '15m' });
+    // In production, send email with reset link. Returning here for dev/testing.
+    res.status(200).json({ success: true, message: 'Password reset token generated', resetToken });
   } catch (error) {
-    res.status(500).json({ message: 'Error processing forgot password', error: error.message });
+    res.status(500).json({ success: false, message: 'Error processing forgot password', error: error.message });
   }
 };
 
@@ -77,70 +99,77 @@ exports.resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
     if (!token || !newPassword) {
-      return res.status(400).json({ message: 'token and newPassword are required' });
+      return res.status(400).json({ success: false, message: 'token and newPassword are required' });
     }
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = users.find(u => u.id === decoded.id);
+    const user = await User.findById(decoded.id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
-    user.password = await bcrypt.hash(newPassword, 10);
-    res.status(200).json({ message: 'Password reset successfully' });
+    user.password = newPassword; // pre-save hook will hash it
+    await user.save();
+    res.status(200).json({ success: true, message: 'Password reset successfully' });
   } catch (error) {
-    res.status(401).json({ message: 'Invalid or expired reset token', error: error.message });
+    res.status(401).json({ success: false, message: 'Invalid or expired reset token', error: error.message });
   }
 };
 
 // POST /auth/refresh-token
-exports.refreshToken = (req, res) => {
+exports.refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
-      return res.status(400).json({ message: 'refreshToken is required' });
+      return res.status(400).json({ success: false, message: 'refreshToken is required' });
     }
     const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
-    const user = users.find(u => u.id === decoded.id);
+    const user = await User.findById(decoded.id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
-    const newToken = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ token: newToken });
+    const newToken = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    res.status(200).json({ success: true, token: newToken });
   } catch (error) {
-    res.status(401).json({ message: 'Invalid or expired refresh token', error: error.message });
+    res.status(401).json({ success: false, message: 'Invalid or expired refresh token', error: error.message });
   }
 };
 
-// GET /auth/me
-exports.getMe = (req, res) => {
+// GET /auth/me  (uses verifyToken middleware from authRoutes)
+exports.getMe = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token provided' });
+      return res.status(401).json({ success: false, message: 'No token provided' });
     }
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = users.find(u => u.id === decoded.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json({ id: user.id, username: user.username, email: user.email, role: user.role });
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.status(200).json({
+      success: true,
+      data: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
   } catch (error) {
-    res.status(401).json({ message: 'Invalid token', error: error.message });
+    res.status(401).json({ success: false, message: 'Invalid token', error: error.message });
   }
 };
 
 // DELETE /auth/account
-exports.deleteAccount = (req, res) => {
+exports.deleteAccount = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token provided' });
+      return res.status(401).json({ success: false, message: 'No token provided' });
     }
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
-    const index = users.findIndex(u => u.id === decoded.id);
-    if (index === -1) return res.status(404).json({ message: 'User not found' });
-    users.splice(index, 1);
-    res.status(200).json({ message: 'Account deleted successfully' });
+    const deleted = await User.findByIdAndDelete(decoded.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'User not found' });
+    res.status(200).json({ success: true, message: 'Account deleted successfully' });
   } catch (error) {
-    res.status(401).json({ message: 'Invalid token', error: error.message });
+    res.status(401).json({ success: false, message: 'Invalid token', error: error.message });
   }
 };
