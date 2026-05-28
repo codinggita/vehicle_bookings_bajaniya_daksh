@@ -17,6 +17,7 @@ const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const AdminBookings = lazy(() => import('./pages/admin/Bookings'));
 const UserDashboard = lazy(() => import('./pages/user/Dashboard'));
 const UserBookings = lazy(() => import('./pages/user/Bookings'));
+const Profile = lazy(() => import('./pages/user/Profile'));
 
 // 404 page
 const NotFound = () => (
@@ -82,6 +83,9 @@ const App = () => {
                   <Route path="/user/dashboard" element={<UserDashboard />} />
                   <Route path="/user/bookings" element={<UserBookings />} />
                 </Route>
+
+                {/* Routes accessible to both Admin and User */}
+                <Route path="/profile" element={<Profile />} />
 
               </Route>
             </Route>

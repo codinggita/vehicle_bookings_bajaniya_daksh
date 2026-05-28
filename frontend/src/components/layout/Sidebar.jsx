@@ -1,5 +1,5 @@
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Box, useTheme, Toolbar } from '@mui/material';
-import { Dashboard, DirectionsCar, Assessment, People } from '@mui/icons-material';
+import { Dashboard, DirectionsCar, Person } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -15,11 +15,13 @@ const Sidebar = () => {
   const adminMenu = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/admin/dashboard' },
     { text: 'Manage Bookings', icon: <DirectionsCar />, path: '/admin/bookings' },
+    { text: 'My Profile', icon: <Person />, path: '/profile' },
   ];
 
   const userMenu = [
     { text: 'My Dashboard', icon: <Dashboard />, path: '/user/dashboard' },
     { text: 'My Bookings', icon: <DirectionsCar />, path: '/user/bookings' },
+    { text: 'My Profile', icon: <Person />, path: '/profile' },
   ];
 
   const menuItems = user?.role === 'Admin' ? adminMenu : userMenu;
