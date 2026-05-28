@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Typography, IconButton, Box, Button, useTheme } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Box, Button, Avatar, useTheme } from '@mui/material';
 import { Menu as MenuIcon, Brightness4, Brightness7, Logout } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme, toggleSidebar } from '../../store/slices/uiSlice';
@@ -16,35 +16,47 @@ const Navbar = () => {
     navigate('/login');
   };
 
+  const appTitle = user?.role === 'Admin' ? 'Vehicle Booking — Admin Panel' : 'Vehicle Booking';
+
   return (
-    <AppBar position="static" color="inherit" elevation={1} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+    <AppBar position="static" color="inherit" elevation={1} sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
       <Toolbar>
         <IconButton
           edge="start"
           color="inherit"
-          aria-label="menu"
+          aria-label="toggle sidebar"
           onClick={() => dispatch(toggleSidebar())}
           sx={{ mr: 2 }}
         >
           <MenuIcon />
         </IconButton>
-        
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-          Vehicle Booking Admin
+
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', color: 'primary.main' }}>
+          {appTitle}
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           {user && (
-            <Typography variant="body1" sx={{ display: { xs: 'none', sm: 'block' } }}>
-              Hello, {user.name} ({user.role})
-            </Typography>
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 14 }}>
+                {user.name?.charAt(0).toUpperCase()}
+              </Avatar>
+              <Box>
+                <Typography variant="body2" fontWeight="bold" lineHeight={1.2}>
+                  {user.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" lineHeight={1}>
+                  {user.role}
+                </Typography>
+              </Box>
+            </Box>
           )}
 
-          <IconButton sx={{ ml: 1 }} onClick={() => dispatch(toggleTheme())} color="inherit">
+          <IconButton onClick={() => dispatch(toggleTheme())} color="inherit" aria-label="toggle theme">
             {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
           </IconButton>
 
-          <Button color="error" variant="outlined" startIcon={<Logout />} onClick={handleLogout}>
+          <Button color="error" variant="outlined" startIcon={<Logout />} onClick={handleLogout} size="small">
             Logout
           </Button>
         </Box>

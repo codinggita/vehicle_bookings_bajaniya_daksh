@@ -10,24 +10,24 @@ const JWT_SECRET = process.env.JWT_SECRET || 'vehicle_booking_secret_key';
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Access denied. No token provided.' });
+    return res.status(401).json({ success: false, message: 'Access denied. No token provided.' });
   }
   try {
     const token = authHeader.split(' ')[1];
     req.user = jwt.verify(token, JWT_SECRET);
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Invalid or expired token.' });
+    return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
   }
 };
 
 /**
  * Middleware: requireAdmin
- * Must be used after verifyToken. Allows only role=admin.
+ * Must be used after verifyToken. Allows only role='Admin' (Title Case).
  */
 const requireAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Access denied. Admins only.' });
+  if (!req.user || req.user.role !== 'Admin') {
+    return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
   }
   next();
 };
