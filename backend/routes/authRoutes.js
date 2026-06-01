@@ -11,6 +11,8 @@ router.post('/reset-password', authController.resetPassword);
 router.post('/refresh-token', authController.refreshToken);
 router.get('/me', authController.getMe);
 router.delete('/account', authController.deleteAccount);
+router.put('/profile', authController.updateProfile);
+router.put('/password', authController.updatePassword);
 
 // HEAD / OPTIONS support
 router.head('/me', authController.getMe);
