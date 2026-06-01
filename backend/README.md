@@ -7,6 +7,10 @@
 
 A robust, scalable, and fully normalized RESTful API for a Vehicle Booking System, built with Node.js, Express, and MongoDB. This backend strictly adheres to the Model-View-Controller (MVC) architectural pattern.
 
+## 🔗 Live Deployment
+The backend API is deployed and accessible at:
+**[https://vehicle-bookings-bajaniya-daksh.onrender.com](https://vehicle-bookings-bajaniya-daksh.onrender.com)**
+
 ## 🌟 Features
 
 - **Strict MVC Architecture:** Clean separation of concerns with dedicated controllers, services, and models.

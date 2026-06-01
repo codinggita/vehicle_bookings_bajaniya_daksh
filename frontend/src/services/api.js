@@ -2,7 +2,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://vehicle-bookings-bajaniya-daksh.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
